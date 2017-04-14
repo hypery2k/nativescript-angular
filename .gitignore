@@ -28,6 +28,11 @@ tests/test-output.txt
 tests/platforms
 tests/lib
 tests/node_modules
+tests/tns/app/**/*.js
+tests/tns/test-output.txt
+tests/tns/platforms
+tests/tns/lib
+tests/tns/node_modules
 tests/hooks
 
 ng-sample/app/**/*.js

@@ -37,7 +37,7 @@ install:
 - cd nativescript-angular
 - npm install
 - npm run tslint
-- cd ../tests
+- cd ../tests/tns
 - npm install
 before_script:
   - echo no | android create avd --force -n $EMULATOR_NAME -t android-$EMULATOR_API_LEVEL --abi $ANDROID_ABI -c 12M
