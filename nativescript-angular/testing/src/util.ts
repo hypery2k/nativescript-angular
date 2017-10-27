@@ -1,18 +1,10 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {NgModule, Type} from '@angular/core';
-import {topmost} from 'tns-core-modules/ui/frame';
-import {View} from 'tns-core-modules/ui/core/view';
 import {NativeScriptModule} from '../../nativescript.module';
 import {platformBrowserDynamicTesting} from '@angular/platform-browser-dynamic/testing';
 import {NS_COMPILER_PROVIDERS} from '../../platform';
 import {NATIVESCRIPT_TESTING_PROVIDERS, NativeScriptTestingModule} from '../index';
 import {CommonModule} from '@angular/common';
-/**
- * Get a reference to the root application view.
- */
-export function testingRootView(): View {
-    return topmost().currentPage.layoutView;
-}
 
 /**
  * Return a promise that resolves after (durationMs) milliseconds
@@ -64,47 +56,39 @@ export function nTestBedBeforeEach(
     entryComponents: any[] = []) {
     return (done) => {
         // If there are no entry components we can take the simple path.
-        const hasEntryComponents: boolean = entryComponents.length > 0;
-        if (!hasEntryComponents) {
+        if (entryComponents.length === 0) {
             TestBed.configureTestingModule({
                 declarations: [...components],
                 providers: [...providers],
                 imports: [NativeScriptModule, ...imports]
             });
-            TestBed.compileComponents()
-                .then(() => done())
-                .catch((e) => {
-                    console.log(`Failed to instantiate test component with error: ${e}`);
-                    console.log(e.stack);
-                    done(e);
-                });
-            return;
         }
-        // If there are entry components, we have to reset the entire freakin' testing platform
-        // in order to make test bed aware of them. There's got to be a better way... (o_O)
-        TestBed.resetTestEnvironment();
-        @NgModule({
-            imports: [
-                NativeScriptModule,
-                NativeScriptTestingModule,
-                CommonModule,
-            ],
-            providers: [
-                ...NATIVESCRIPT_TESTING_PROVIDERS,
-            ],
-            entryComponents: [...entryComponents]
-        })
-        class EntryComponentsTestModule {
+        else {
+            // If there are entry components, we have to reset the testing platform.
+            //
+            // There's got to be a better way... (o_O)
+            TestBed.resetTestEnvironment();
+            @NgModule({
+                imports: [
+                    NativeScriptModule, NativeScriptTestingModule, CommonModule
+                ],
+                providers: [
+                    ...NATIVESCRIPT_TESTING_PROVIDERS,
+                ],
+                entryComponents: [...entryComponents]
+            })
+            class EntryComponentsTestModule {
+            }
+            TestBed.initTestEnvironment(
+                EntryComponentsTestModule,
+                platformBrowserDynamicTesting(NS_COMPILER_PROVIDERS)
+            );
+            TestBed.configureTestingModule({
+                declarations: [...components, ...entryComponents],
+                imports: [...imports],
+                providers: [...providers],
+            });
         }
-        TestBed.initTestEnvironment(
-            EntryComponentsTestModule,
-            platformBrowserDynamicTesting(NS_COMPILER_PROVIDERS)
-        );
-        TestBed.configureTestingModule({
-            declarations: [...components, ...entryComponents],
-            imports: [...imports],
-            providers: [...providers],
-        });
         TestBed.compileComponents()
             .then(() => done())
             .catch((e) => {
@@ -133,11 +117,8 @@ export function nBasicTestBedInit() {
  */
 export function nTestBedAfterEach(resetEnv = true, resetFn = nBasicTestBedInit) {
     return () => {
-        if (!resetEnv) {
-            TestBed.resetTestingModule();
-        }
-        else {
-            TestBed.resetTestingModule();
+        TestBed.resetTestingModule();
+        if (resetEnv) {
             TestBed.resetTestEnvironment();
             resetFn();
         }

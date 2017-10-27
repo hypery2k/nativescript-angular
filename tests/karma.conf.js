@@ -19,6 +19,8 @@ module.exports = function(config) {
       'app/tests/detached-loader-tests.js',
       'app/tests/modal-dialog.js',
       'app/tests/platform-filter-components.js',
+      'app/tests/third-party.js',
+      'app/tests/renderer-tests.js',
     ],
 
 
