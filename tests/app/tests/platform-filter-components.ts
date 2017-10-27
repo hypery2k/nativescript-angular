@@ -1,76 +1,72 @@
 // make sure you import mocha-config before @angular/core
-import { assert } from "./test-config";
-import { Component, ElementRef } from "@angular/core";
-import { dumpView, createDevice } from "./test-utils";
-import { TestApp } from "./test-app";
-import { DEVICE } from "nativescript-angular/platform-providers";
-import { platformNames } from "platform";
+import {assert} from './test-config';
+import {Component, ElementRef} from '@angular/core';
+import {createDevice, dumpView} from './test-utils';
+import {DEVICE} from 'nativescript-angular/platform-providers';
+import {platformNames} from 'platform';
+import {nTestBedAfterEach, nTestBedBeforeEach, nTestBedRender} from 'nativescript-angular/testing';
 
 @Component({
     template: `
-    <StackLayout>
-        <ios><Label text="IOS"></Label></ios>
-    </StackLayout>`
+        <StackLayout>
+            <ios><Label text="IOS"></Label></ios>
+        </StackLayout>`
 })
 export class IosSpecificComponent {
-    constructor(public elementRef: ElementRef) { }
+    constructor(public elementRef: ElementRef) {
+    }
 }
 
 @Component({
     template: `
-    <StackLayout>
-        <android><Label text="ANDROID"></Label></android>
-    </StackLayout>`
+        <StackLayout>
+            <android><Label text="ANDROID"></Label></android>
+        </StackLayout>`
 })
 export class AndroidSpecificComponent {
-    constructor(public elementRef: ElementRef) { }
+    constructor(public elementRef: ElementRef) {
+    }
 }
 
 @Component({
     template: `
-    <StackLayout>
-        <Label android:text="ANDROID" ios:text="IOS"></Label>
-    </StackLayout>`
+        <StackLayout>
+            <Label android:text="ANDROID" ios:text="IOS"></Label>
+        </StackLayout>`
 })
 export class PlatformSpecificAttributeComponent {
-    constructor(public elementRef: ElementRef) { }
+    constructor(public elementRef: ElementRef) {
+    }
 }
 
+// TODO: Something is different in dumpView. I suspect it has to do with the fact that TestApp rendered directly
+// into a view container and returned the exact component, whereas testbed appears to return a reference to the root
+// component? Needs investigation.
 describe("Platform filter directives", () => {
+
     describe("on IOS device", () => {
-        let testApp: TestApp = null;
-
-        before(() => {
-            return TestApp.create([{ provide: DEVICE, useValue: createDevice(platformNames.ios) }], [
-                PlatformSpecificAttributeComponent,
-                AndroidSpecificComponent,
-                IosSpecificComponent
-            ]).then((app) => {
-                testApp = app;
-            });
-        });
-
-        after(() => {
-            testApp.dispose();
-        });
-
+        beforeEach(nTestBedBeforeEach(
+            [PlatformSpecificAttributeComponent, AndroidSpecificComponent, IosSpecificComponent],
+            [{provide: DEVICE, useValue: createDevice(platformNames.ios)}]
+        ));
+        afterEach(nTestBedAfterEach());
         it("does render ios specific content", () => {
-            return testApp.loadComponent(IosSpecificComponent).then((componentRef) => {
+            return nTestBedRender(IosSpecificComponent).then((fixture) => {
+                const componentRef = fixture.componentRef;
                 const componentRoot = componentRef.instance.elementRef.nativeElement;
                 assert.isTrue(dumpView(componentRoot, true).indexOf("(Label[text=IOS])") >= 0);
             });
         });
-
         it("does not render android specific content", () => {
-            return testApp.loadComponent(AndroidSpecificComponent).then((componentRef) => {
+            return nTestBedRender(AndroidSpecificComponent).then((fixture) => {
+                const componentRef = fixture.componentRef;
                 const componentRoot = componentRef.instance.elementRef.nativeElement;
                 assert.isTrue(dumpView(componentRoot, true).indexOf("Label") < 0);
             });
         });
-
-
         it("applies iOS specific attribute", () => {
-            return testApp.loadComponent(PlatformSpecificAttributeComponent).then((componentRef) => {
+            return nTestBedRender(PlatformSpecificAttributeComponent).then((fixture) => {
+                const componentRef = fixture.componentRef;
                 const componentRoot = componentRef.instance.elementRef.nativeElement;
                 assert.equal(
                     "(ProxyViewContainer (StackLayout (Label[text=IOS])))",
@@ -80,38 +76,29 @@ describe("Platform filter directives", () => {
     });
 
     describe("on Android device", () => {
-        let testApp: TestApp = null;
-
-        before(() => {
-            return TestApp.create([{ provide: DEVICE, useValue: createDevice(platformNames.android) }], [
-                AndroidSpecificComponent,
-                IosSpecificComponent,
-                PlatformSpecificAttributeComponent
-            ]).then((app) => {
-                testApp = app;
-            });
-        });
-
-        after(() => {
-            testApp.dispose();
-        });
+        beforeEach(nTestBedBeforeEach(
+            [PlatformSpecificAttributeComponent, AndroidSpecificComponent, IosSpecificComponent],
+            [{provide: DEVICE, useValue: createDevice(platformNames.android)}]
+        ));
+        afterEach(nTestBedAfterEach());
 
         it("does render android specific content", () => {
-            return testApp.loadComponent(AndroidSpecificComponent).then((componentRef) => {
+            return nTestBedRender(AndroidSpecificComponent).then((fixture) => {
+                const componentRef = fixture.componentRef;
                 const componentRoot = componentRef.instance.elementRef.nativeElement;
                 assert.isTrue(dumpView(componentRoot, true).indexOf("(Label[text=ANDROID])") >= 0);
             });
         });
-
         it("does not render ios specific content", () => {
-            return testApp.loadComponent(IosSpecificComponent).then((componentRef) => {
+            return nTestBedRender(IosSpecificComponent).then((fixture) => {
+                const componentRef = fixture.componentRef;
                 const componentRoot = componentRef.instance.elementRef.nativeElement;
                 assert.isTrue(dumpView(componentRoot, true).indexOf("Label") < 0);
             });
         });
-
         it("applies Android specific attribute", () => {
-            return testApp.loadComponent(PlatformSpecificAttributeComponent).then((componentRef) => {
+            return nTestBedRender(PlatformSpecificAttributeComponent).then((fixture) => {
+                const componentRef = fixture.componentRef;
                 const componentRoot = componentRef.instance.elementRef.nativeElement;
                 assert.equal(
                     "(ProxyViewContainer (StackLayout (Label[text=ANDROID])))",

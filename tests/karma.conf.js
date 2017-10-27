@@ -13,7 +13,12 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'app/**/*.js',
+      'app/tests/test-main.js',
+      //'app/**/*.js',
+      'app/tests/list-view-tests.js',
+      'app/tests/detached-loader-tests.js',
+      'app/tests/modal-dialog.js',
+      'app/tests/platform-filter-components.js',
     ],
 
 
