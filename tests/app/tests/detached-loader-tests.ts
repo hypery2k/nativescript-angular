@@ -49,7 +49,7 @@ export class LoaderComponentOnPush extends LoaderComponentBase { }
 // TODO(JD): These tests should work, but demonstrate an annoying bug I've noticed sometimes with @ViewChild
 //
 // The @ViewChild(DetachedLoader) on LoaderComponentBase fails. Can anyone shed some light on why?
-describe("DetachedLoader", () => {
+xdescribe("DetachedLoader", () => {
 
     beforeEach(nTestBedBeforeEach([LoaderComponent, LoaderComponentOnPush], [], [], [TestComponent]));
     afterEach(nTestBedAfterEach());

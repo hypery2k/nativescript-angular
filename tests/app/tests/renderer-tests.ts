@@ -12,7 +12,7 @@ import {registerElement} from 'nativescript-angular/element-registry';
 import * as button from 'tns-core-modules/ui/button';
 import * as view from 'tns-core-modules/ui/core/view';
 import {nTestBedAfterEach, nTestBedBeforeEach, nTestBedRender} from 'nativescript-angular/testing';
-import {ComponentFixture} from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 @Component({
     template: `<StackLayout><Label text="Layout"></Label></StackLayout>`
@@ -243,7 +243,7 @@ export class NgForLabel {
     }
 }
 
-xdescribe("Renderer E2E", () => {
+describe("Renderer E2E", () => {
     beforeEach(nTestBedBeforeEach([
         LayoutWithLabel, LabelCmp, LabelContainer,
         ProjectableCmp, ProjectionContainer,
@@ -315,7 +315,7 @@ xdescribe("Renderer E2E", () => {
             done();
         };
 
-        return nTestBedRender(ZonedRenderer).then((fixture: ComponentFixture<ZonedRenderer>) => {
+        nTestBedRender(ZonedRenderer).then((fixture: ComponentFixture<ZonedRenderer>) => {
             fixture.ngZone.run(() => {
                 fixture.componentInstance.renderer.listen(view, eventName, callback);
             });
@@ -338,7 +338,7 @@ xdescribe("Renderer E2E", () => {
             assert.isTrue(NgZone.isInAngularZone(), "Event should be executed inside NgZone");
             done();
         };
-        return nTestBedRender(ZonedRenderer).then((fixture: ComponentFixture<ZonedRenderer>) => {
+        nTestBedRender(ZonedRenderer).then((fixture: ComponentFixture<ZonedRenderer>) => {
             fixture.ngZone.runOutsideAngular(() => {
                 fixture.componentInstance.renderer.listen(view, eventName, callback);
 
@@ -609,6 +609,7 @@ describe("Renderer attach/detach", () => {
     });
 });
 
+// TODO: I'm not sure about this lifecycle test.
 xdescribe("Renderer lifecycle", () => {
     let renderer: Renderer2 = null;
     beforeEach(nTestBedBeforeEach([ZonedRenderer, NgControlSettersCount]));
@@ -622,17 +623,17 @@ xdescribe("Renderer lifecycle", () => {
     });
 
     it("view native setters are called once on startup", () => {
-        return nTestBedRender(NgControlSettersCount).then((fixture) => {
-            const componentRef: ComponentRef<NgControlSettersCount> = fixture.componentRef;
-            assert.isTrue(componentRef.instance.isAfterViewInit, "Expected the NgControlSettersCount to have passed its ngAfterViewInit.");
-            componentRef.instance.buttons.map(btn => btn.nativeElement).forEach(btn => {
-                assert.isTrue(btn.isLoaded, `Expected ${btn.id} to be allready loaded.`);
-                assert.isFalse(btn.isLayoutValid, `Expected ${btn.id}'s layout to be invalid.`);
+        const fixture = TestBed.createComponent(NgControlSettersCount);
+        fixture.detectChanges();
+        const componentRef: ComponentRef<NgControlSettersCount> = fixture.componentRef;
+        assert.isTrue(componentRef.instance.isAfterViewInit, "Expected the NgControlSettersCount to have passed its ngAfterViewInit.");
+        componentRef.instance.buttons.map(btn => btn.nativeElement).forEach(btn => {
+            assert.isTrue(btn.isLoaded, `Expected ${btn.id} to be allready loaded.`);
+            assert.isFalse(btn.isLayoutValid, `Expected ${btn.id}'s layout to be invalid.`);
 
-                assert.equal(btn.backgroundInternalSetNativeCount, 1, `Expected ${btn.id} backgroundInternalSetNativeCount to be called just once.`);
-                assert.equal(btn.fontInternalSetNativeCount, 1, `Expected ${btn.id} fontInternalSetNativeCount to be called just once.`);
-                assert.equal(btn.nativeBackgroundRedraws, 0, `Expected ${btn.id} nativeBackgroundRedraws to be called after its layout pass.`);
-            });
+            assert.equal(btn.backgroundInternalSetNativeCount, 1, `Expected ${btn.id} backgroundInternalSetNativeCount to be called just once.`);
+            assert.equal(btn.fontInternalSetNativeCount, 1, `Expected ${btn.id} fontInternalSetNativeCount to be called just once.`);
+            assert.equal(btn.nativeBackgroundRedraws, 0, `Expected ${btn.id} nativeBackgroundRedraws to be called after its layout pass.`);
         });
     });
 });
