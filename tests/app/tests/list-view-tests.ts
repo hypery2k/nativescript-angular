@@ -1,15 +1,13 @@
-import {assert} from './test-config';
-import {Component, Input} from '@angular/core';
-import {ComponentFixture} from '@angular/core/testing';
-import {nTestBedAfterEach, nTestBedBeforeEach, nTestBedRender} from 'nativescript-angular/testing';
-
+import { assert } from "./test-config";
+import { Component, Input } from "@angular/core";
+import { ComponentFixture } from "@angular/core/testing";
+import { nTestBedAfterEach, nTestBedBeforeEach, nTestBedRender } from "nativescript-angular/testing";
 // import trace = require("trace");
 // trace.setCategories("ns-list-view, " + trace.categories.Navigation);
 // trace.enable();
 
 class DataItem {
-    constructor(public id: number, public name: string) {
-    }
+    constructor(public id: number, public name: string) { }
 }
 
 const ITEMS = [
@@ -24,22 +22,19 @@ let testTemplates: { first: number, second: number };
 @Component({
     selector: "list-view-setupItemView",
     template: `
-        <GridLayout>
-            <ListView [items]="myItems" (setupItemView)="onSetupItemView($event)">
-                <ng-template let-item="item">
-                    <Label [text]='"[" + item.id +"] " + item.name'></Label>
-                </ng-template>
-            </ListView>
-        </GridLayout>
+    <GridLayout>
+        <ListView [items]="myItems" (setupItemView)="onSetupItemView($event)">
+            <ng-template let-item="item">
+                <Label [text]='"[" + item.id +"] " + item.name'></Label>
+            </ng-template>
+        </ListView>
+    </GridLayout>
     `
 })
 export class TestListViewComponent {
     public myItems: Array<DataItem> = ITEMS;
     public counter: number = 0;
-
-    onSetupItemView(args) {
-        this.counter++;
-    }
+    onSetupItemView(args) { this.counter++; }
 }
 
 @Component({
@@ -61,27 +56,24 @@ export class ItemTemplateComponent {
 @Component({
     selector: "list-with-template-selector",
     template: `
-        <GridLayout>
-            <ListView [items]="myItems" [itemTemplateSelector]="templateSelector">
-                <ng-template nsTemplateKey="first">
-                    <item-component templateName="first"></item-component>
-                </ng-template>
-                <ng-template nsTemplateKey="second" let-item="item">
-                    <item-component templateName="second"></item-component>
-                </ng-template>
-            </ListView>
-        </GridLayout>
+    <GridLayout>
+        <ListView [items]="myItems" [itemTemplateSelector]="templateSelector">
+            <ng-template nsTemplateKey="first">
+                <item-component templateName="first"></item-component>
+            </ng-template>
+            <ng-template nsTemplateKey="second" let-item="item">
+                <item-component templateName="second"></item-component>
+            </ng-template>
+        </ListView>
+    </GridLayout>
     `
 })
 export class TestListViewSelectorComponent {
     public myItems: Array<DataItem> = ITEMS;
     public templateSelector = (item: DataItem, index: number, items: any) => {
         return (item.id % 2 === 0) ? "first" : "second";
-    };
-
-    constructor() {
-        testTemplates = {first: 0, second: 0};
     }
+    constructor() { testTemplates = { first: 0, second: 0 }; }
 }
 
 describe("ListView-tests", () => {

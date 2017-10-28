@@ -72,10 +72,10 @@ export function nTestBedBeforeEach(
                 imports: [
                     NativeScriptModule, NativeScriptTestingModule, CommonModule
                 ],
-                providers: [
-                    ...NATIVESCRIPT_TESTING_PROVIDERS,
-                ],
-                entryComponents: [...entryComponents]
+                providers: NATIVESCRIPT_TESTING_PROVIDERS,
+                exports: entryComponents,
+                declarations: entryComponents,
+                entryComponents: entryComponents
             })
             class EntryComponentsTestModule {
             }
@@ -84,7 +84,7 @@ export function nTestBedBeforeEach(
                 platformBrowserDynamicTesting(NS_COMPILER_PROVIDERS)
             );
             TestBed.configureTestingModule({
-                declarations: [...components, ...entryComponents],
+                declarations: [...components],
                 imports: [...imports],
                 providers: [...providers],
             });
