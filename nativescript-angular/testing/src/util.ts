@@ -1,10 +1,10 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {NgModule, Type} from '@angular/core';
-import {NativeScriptModule} from '../../nativescript.module';
-import {platformBrowserDynamicTesting} from '@angular/platform-browser-dynamic/testing';
-import {NS_COMPILER_PROVIDERS} from '../../platform';
-import {NATIVESCRIPT_TESTING_PROVIDERS, NativeScriptTestingModule} from '../index';
-import {CommonModule} from '@angular/common';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { NgModule, Type } from "@angular/core";
+import { NativeScriptModule } from "../../nativescript.module";
+import { platformBrowserDynamicTesting } from "@angular/platform-browser-dynamic/testing";
+import { NS_COMPILER_PROVIDERS } from "../../platform";
+import { NATIVESCRIPT_TESTING_PROVIDERS, NativeScriptTestingModule } from "../index";
+import { CommonModule } from "@angular/common";
 
 /**
  * Return a promise that resolves after (durationMs) milliseconds
@@ -62,8 +62,7 @@ export function nTestBedBeforeEach(
                 providers: [...providers],
                 imports: [NativeScriptModule, ...imports]
             });
-        }
-        else {
+        } else {
             // If there are entry components, we have to reset the testing platform.
             //
             // There's got to be a better way... (o_O)
@@ -96,7 +95,7 @@ export function nTestBedBeforeEach(
                 console.log(e.stack);
                 done();
             });
-    }
+    };
 
 }
 

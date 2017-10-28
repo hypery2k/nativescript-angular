@@ -110,7 +110,7 @@ export class NativeScriptRenderer extends Renderer2 {
     @profile
     selectRootElement(selector: string): NgView {
         traceLog("NativeScriptRenderer.selectRootElement: " + selector);
-        if (selector && selector[0] === '#') {
+        if (selector && selector[0] === "#") {
             const result = getViewById(this.rootView, selector.slice(1));
             return (result || this.rootView) as NgView;
         }
