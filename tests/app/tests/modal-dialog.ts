@@ -1,14 +1,14 @@
 // make sure you import mocha-config before @angular/core
-import {assert} from './test-config';
-import {Component, ViewContainerRef} from '@angular/core';
-import {Page} from 'ui/page';
-import {topmost} from 'ui/frame';
-import {ModalDialogParams, ModalDialogService} from 'nativescript-angular/directives/dialogs';
+import {assert} from "./test-config";
+import {Component, ViewContainerRef} from "@angular/core";
+import {Page} from "ui/page";
+import {topmost} from "ui/frame";
+import {ModalDialogParams, ModalDialogService} from "nativescript-angular/directives/dialogs";
 
-import {device, platformNames} from 'platform';
+import {device, platformNames} from "platform";
 
-import {ComponentFixture} from '@angular/core/testing';
-import {nTestBedRender, nTestBedAfterEach, nTestBedBeforeEach} from 'nativescript-angular/testing';
+import {ComponentFixture} from "@angular/core/testing";
+import {nTestBedRender, nTestBedAfterEach, nTestBedBeforeEach} from "nativescript-angular/testing";
 const CLOSE_WAIT = (device.os === platformNames.ios) ? 1000 : 0;
 
 @Component({

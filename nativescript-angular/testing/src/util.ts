@@ -1,3 +1,7 @@
+
+import { View } from "tns-core-modules/ui/core/view";
+import { topmost } from "tns-core-modules/ui/frame";
+import { LayoutBase } from "tns-core-modules/ui/layouts/layout-base";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { NgModule, Type } from "@angular/core";
 import { NativeScriptModule } from "../../nativescript.module";
@@ -5,6 +9,19 @@ import { platformBrowserDynamicTesting } from "@angular/platform-browser-dynamic
 import { NS_COMPILER_PROVIDERS } from "../../platform";
 import { NATIVESCRIPT_TESTING_PROVIDERS, NativeScriptTestingModule } from "../index";
 import { CommonModule } from "@angular/common";
+/**
+ * Get a reference to the root application view.
+ */
+export function testingRootView(): View {
+    return topmost().currentPage.content;
+}
+
+/**
+ * Declared test contexts. When the suite is done this map should be empty if all lifecycle
+ * calls have happened as expected.
+ * @private
+ */
+const activeTestFixtures: ComponentFixture<any>[][] = [];
 
 /**
  * Return a promise that resolves after (durationMs) milliseconds
@@ -14,19 +31,13 @@ export function promiseWait(durationMs: number) {
 }
 
 /**
- * Render a component using the TestBed helper, and return a promise that resolves when the
- * ComponentFixture is fully initialized.
+ * Perform basic TestBed environment initialization. Call this once in the main entry point to your tests.
  */
-export function nTestBedRender<T>(componentType: Type<T>): Promise<ComponentFixture<T>> {
-    const fixture = TestBed.createComponent(componentType);
-    fixture.detectChanges();
-    return fixture.whenRenderingDone()
-    // TODO(jd): it seems that the whenStable and whenRenderingDone utilities of ComponentFixture
-    //           do not work as expected. I looked at how to fix it and it's not clear how to provide
-    //           a {N} specific subclass, because ComponentFixture is newed directly rather than injected
-    // What to do about it? Maybe fakeAsync can help? For now just setTimeout for 100ms (x_X)
-        .then(promiseWait(100))
-        .then(() => fixture);
+export function nTestBedInit() {
+    TestBed.initTestEnvironment(
+        NativeScriptTestingModule,
+        platformBrowserDynamicTesting(NS_COMPILER_PROVIDERS)
+    );
 }
 
 /**
@@ -55,6 +66,7 @@ export function nTestBedBeforeEach(
     imports: any[] = [],
     entryComponents: any[] = []) {
     return (done) => {
+        activeTestFixtures.push([]);
         // If there are no entry components we can take the simple path.
         if (entryComponents.length === 0) {
             TestBed.configureTestingModule({
@@ -96,17 +108,6 @@ export function nTestBedBeforeEach(
                 done();
             });
     };
-
-}
-
-/**
- * Perform basic TestBed environment initialization. Call this once in the main entry point to your tests.
- */
-export function nBasicTestBedInit() {
-    TestBed.initTestEnvironment(
-        NativeScriptTestingModule,
-        platformBrowserDynamicTesting(NS_COMPILER_PROVIDERS)
-    );
 }
 
 /**
@@ -114,12 +115,52 @@ export function nBasicTestBedInit() {
  * @param resetEnv When true the testing environment will be reset
  * @param resetFn When resetting the environment, use this init function
  */
-export function nTestBedAfterEach(resetEnv = true, resetFn = nBasicTestBedInit) {
+export function nTestBedAfterEach(resetEnv = true, resetFn = nTestBedInit) {
     return () => {
+        if (activeTestFixtures.length === 0) {
+            throw new Error(
+                `There are no more declared fixtures.` +
+                `Did you call "nTestBedBeforeEach" and "nTestBedAfterEach" an equal number of times?`
+            );
+        }
+        const root = testingRootView() as LayoutBase;
+        const fixtures = activeTestFixtures.pop();
+        fixtures.forEach((fixture) => {
+            root.removeChild(fixture.nativeElement);
+            fixture.destroy();
+        });
         TestBed.resetTestingModule();
         if (resetEnv) {
             TestBed.resetTestEnvironment();
             resetFn();
         }
     };
+}
+
+/**
+ * Render a component using the TestBed helper, and return a promise that resolves when the
+ * ComponentFixture is fully initialized.
+ */
+export function nTestBedRender<T>(componentType: Type<T>): Promise<ComponentFixture<T>> {
+    const fixture = TestBed.createComponent(componentType);
+    fixture.detectChanges();
+    return fixture.whenRenderingDone()
+    // TODO(jd): it seems that the whenStable and whenRenderingDone utilities of ComponentFixture
+    //           do not work as expected. I looked at how to fix it and it's not clear how to provide
+    //           a {N} specific subclass, because ComponentFixture is newed directly rather than injected
+    // What to do about it? Maybe fakeAsync can help? For now just setTimeout for 100ms (x_X)
+        .then(promiseWait(100))
+        .then(() => {
+            const list = activeTestFixtures[activeTestFixtures.length - 1];
+            if (!list) {
+                console.warn(
+                    "nTestBedRender called without nTestBedBeforeEach/nTestBedAfter each. " +
+                    "You are responsible for calling 'fixture.destroy()' when your test is done " +
+                    "in order to clean up the components that are created."
+                );
+            } else {
+                list.push(fixture);
+            }
+            return fixture;
+        });
 }
