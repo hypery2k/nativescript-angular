@@ -80,12 +80,8 @@ export function nTestBedBeforeEach(
             // There's got to be a better way... (o_O)
             TestBed.resetTestEnvironment();
             @NgModule({
-                imports: [
-                    NativeScriptModule, NativeScriptTestingModule, CommonModule
-                ],
-                providers: NATIVESCRIPT_TESTING_PROVIDERS,
-                exports: entryComponents,
                 declarations: entryComponents,
+                exports: entryComponents,
                 entryComponents: entryComponents
             })
             class EntryComponentsTestModule {
@@ -95,9 +91,12 @@ export function nTestBedBeforeEach(
                 platformBrowserDynamicTesting(NS_COMPILER_PROVIDERS)
             );
             TestBed.configureTestingModule({
-                declarations: [...components],
-                imports: [...imports],
-                providers: [...providers],
+                declarations: components,
+                imports: [
+                    NativeScriptModule, NativeScriptTestingModule, CommonModule,
+                    ...imports
+                ],
+                providers: [...providers, ...NATIVESCRIPT_TESTING_PROVIDERS],
             });
         }
         TestBed.compileComponents()

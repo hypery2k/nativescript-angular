@@ -39,9 +39,9 @@ export class FailComponent {
     selector: "sucess-comp",
     providers: [ModalDialogService],
     template: `
-        <GridLayout margin="20">
-            <Label text="Modal dialogs"></Label>
-        </GridLayout>`
+    <GridLayout margin="20">
+        <Label text="Modal dialogs"></Label>
+    </GridLayout>`
 })
 export class SuccessComponent {
     constructor(public service: ModalDialogService, public vcRef: ViewContainerRef) {
