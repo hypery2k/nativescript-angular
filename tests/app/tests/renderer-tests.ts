@@ -1,18 +1,20 @@
 // make sure you import mocha-config before @angular/core
-import {assert} from './test-config';
-import {Component, ComponentRef, ElementRef, NgZone, Renderer2, ViewChild} from '@angular/core';
-import {ProxyViewContainer} from 'ui/proxy-view-container';
-import {Red} from 'color/known-colors';
-import {dumpView} from './test-utils';
-import {LayoutBase} from 'ui/layouts/layout-base';
-import {StackLayout} from 'ui/layouts/stack-layout';
-import {ContentView} from 'ui/content-view';
-import {Button} from 'ui/button';
-import {registerElement} from 'nativescript-angular/element-registry';
-import * as button from 'tns-core-modules/ui/button';
-import * as view from 'tns-core-modules/ui/core/view';
-import {nTestBedAfterEach, nTestBedBeforeEach, nTestBedRender} from 'nativescript-angular/testing';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {assert} from "./test-config";
+import {Component, ComponentRef, ElementRef, NgZone, Renderer2, ViewChild} from "@angular/core";
+import {ProxyViewContainer} from "ui/proxy-view-container";
+import {Red} from "color/known-colors";
+import {dumpView} from "./test-utils";
+import {LayoutBase} from "ui/layouts/layout-base";
+import {StackLayout} from "ui/layouts/stack-layout";
+import {ContentView} from "ui/content-view";
+import {Button} from "ui/button";
+import {registerElement} from "nativescript-angular/element-registry";
+import * as button from "tns-core-modules/ui/button";
+import * as view from "tns-core-modules/ui/core/view";
+import {nTestBedAfterEach, nTestBedBeforeEach, nTestBedRender} from "nativescript-angular/testing";
+import {ComponentFixture, TestBed} from "@angular/core/testing";
+import {Observable} from "rxjs/Observable";
+import {ReplaySubject} from "rxjs/ReplaySubject";
 
 @Component({
     template: `<StackLayout><Label text="Layout"></Label></StackLayout>`
@@ -226,10 +228,10 @@ export class NgControlSettersCount {
 
     get buttons(): ElementRef[] { return [this.btn1, this.btn2, this.btn3, this.btn4]; }
 
-    isAfterViewInit: boolean = false;
+    ready$: Observable<boolean> = new ReplaySubject<boolean>(1);
 
     ngAfterViewInit() {
-        this.isAfterViewInit = true;
+        (this.ready$ as ReplaySubject<boolean>).next(true);
     }
 }
 
@@ -609,8 +611,7 @@ describe("Renderer attach/detach", () => {
     });
 });
 
-// TODO: I'm not sure about this lifecycle test.
-xdescribe("Renderer lifecycle", () => {
+describe("Renderer lifecycle", () => {
     let renderer: Renderer2 = null;
     beforeEach(nTestBedBeforeEach([ZonedRenderer, NgControlSettersCount]));
     afterEach(nTestBedAfterEach(false));
@@ -624,16 +625,28 @@ xdescribe("Renderer lifecycle", () => {
 
     it("view native setters are called once on startup", () => {
         const fixture = TestBed.createComponent(NgControlSettersCount);
-        fixture.detectChanges();
-        const componentRef: ComponentRef<NgControlSettersCount> = fixture.componentRef;
-        assert.isTrue(componentRef.instance.isAfterViewInit, "Expected the NgControlSettersCount to have passed its ngAfterViewInit.");
-        componentRef.instance.buttons.map(btn => btn.nativeElement).forEach(btn => {
-            assert.isTrue(btn.isLoaded, `Expected ${btn.id} to be allready loaded.`);
-            assert.isFalse(btn.isLayoutValid, `Expected ${btn.id}'s layout to be invalid.`);
+        const component: NgControlSettersCount = fixture.componentInstance;
+        return component.ready$.subscribe(() => {
+            component.buttons.map(btn => btn.nativeElement).forEach(btn => {
+                assert.isTrue(btn.isLoaded, `Expected ${btn.id} to be loaded.`);
+                assert.isFalse(
+                    btn.isLayoutValid,
+                    `Expected ${btn.id}'s layout to be invalid because it is uninitialized.`
+                );
 
-            assert.equal(btn.backgroundInternalSetNativeCount, 1, `Expected ${btn.id} backgroundInternalSetNativeCount to be called just once.`);
-            assert.equal(btn.fontInternalSetNativeCount, 1, `Expected ${btn.id} fontInternalSetNativeCount to be called just once.`);
-            assert.equal(btn.nativeBackgroundRedraws, 0, `Expected ${btn.id} nativeBackgroundRedraws to be called after its layout pass.`);
+                assert.equal(
+                    btn.backgroundInternalSetNativeCount, 1,
+                    `Expected ${btn.id} backgroundInternalSetNativeCount to be called just once.`
+                );
+                assert.equal(
+                    btn.fontInternalSetNativeCount, 1,
+                    `Expected ${btn.id} fontInternalSetNativeCount to be called just once.`
+                );
+                assert.equal(
+                    btn.nativeBackgroundRedraws, 0,
+                    `Expected ${btn.id} nativeBackgroundRedraws to be called after its layout pass.`
+                );
+            });
         });
     });
 });
