@@ -1,11 +1,11 @@
 // make sure you import mocha-config before @angular/core
-import {assert} from './test-config';
-import {Component, ComponentRef, Directive, TemplateRef, ViewContainerRef} from '@angular/core';
-import {View} from 'ui/core/view';
-import {Label} from 'ui/label';
-import {nTestBedAfterEach, nTestBedBeforeEach, nTestBedRender} from 'nativescript-angular/testing';
+import {assert} from "./test-config";
+import {Component, ComponentRef, Directive, TemplateRef, ViewContainerRef} from "@angular/core";
+import {View} from "ui/core/view";
+import {Label} from "ui/label";
+import {nTestBedAfterEach, nTestBedBeforeEach, nTestBedRender} from "nativescript-angular/testing";
 // >> third-party-simple-view-registration
-import {registerElement} from 'nativescript-angular/element-registry';
+import {registerElement} from "nativescript-angular/element-registry";
 registerElement("third-party-view", () => require("./third-party-view").SimpleTag);
 // << third-party-simple-view-registration
 
@@ -48,18 +48,18 @@ export class DocumentFormComponent {
 })
 export class DocumentTitleDirective {
     public static titleLabel: Label;
-
     constructor(
         private ownerForm: DocumentFormComponent,
         private viewContainer: ViewContainerRef,
-        private template: TemplateRef<any>) {
+        private template: TemplateRef<any>
+    ) {
     }
 
     ngOnInit() {
         const viewRef = this.viewContainer.createEmbeddedView(this.template);
         // filter out whitespace nodes
         const titleViews = viewRef.rootNodes.filter((node) =>
-        node && node.nodeName !== "#text");
+                            node && node.nodeName !== "#text");
 
         if (titleViews.length > 0) {
             const titleView = titleViews[0];
@@ -73,9 +73,9 @@ export class DocumentTitleDirective {
 @Component({
     selector: "document-form-container",
     template: `
-        <document-form src="document1.pdf">
-            <Label *documentTitle text="Document1"></Label>
-        </document-form>
+    <document-form src="document1.pdf">
+        <Label *documentTitle text="Document1"></Label>
+    </document-form>
     `
 })
 export class DocumentFormContainer {

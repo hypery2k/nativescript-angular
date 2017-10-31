@@ -9,9 +9,6 @@ import { ProxyViewContainer } from "tns-core-modules/ui/proxy-view-container";
  */
 @Injectable()
 export class NativeScriptTestComponentRenderer extends TestComponentRenderer {
-  constructor() {
-    super();
-  }
 
   insertRootElement(rootElId: string) {
     const page = topmost().currentPage;
