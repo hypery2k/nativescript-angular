@@ -7,7 +7,7 @@ env:
     - ANDROID_BUILD_TOOLS_VERSION=26.0.2
     - ANDROID_ABI=armeabi-v7a
     - APPIUM_VERSION=1.7.0
-    - EMULATOR_NAME=test
+    - EMULATOR_NAME=Emulator-Api22-Default
     - ANDROID_TAG=google_apis
 
 matrix:
@@ -40,6 +40,8 @@ matrix:
         - npm run ngc
         - cd ../tests
         - tns build ios
+        - tns test ios --justlaunch --emulator
+        - npm run e2e -- --runType sim.iPhone8.iOS112
     - os: osx
       env:
         - Build="iOS"
@@ -58,6 +60,8 @@ matrix:
         - npm run ngc
         - cd ../tests
         - tns build ios
+        - tns test ios --justlaunch --emulator
+        - npm run e2e -- --runType sim.iPhone8.iOS112
     - language: android
       node_js: "6"
       os: linux
@@ -80,6 +84,8 @@ matrix:
         - npm run ngc
         - cd ../tests
         - tns build android
+        - tns test android --justlaunch --emulator
+        - npm run e2e -- --runType android22
     - language: android
       node_js: "8"
       os: linux
@@ -102,6 +108,8 @@ matrix:
         - npm run ngc
         - cd ../tests
         - tns build android
+        - tns test android --justlaunch --emulator
+        - npm run e2e -- --runType android22
 
 android:
   components:
